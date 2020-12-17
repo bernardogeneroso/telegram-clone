@@ -2,5 +2,3 @@
 mysql.js
 .env
 src/uploads/avatars/*
-!src/uploads
-!src/uploads/avatars
