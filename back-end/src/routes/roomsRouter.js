@@ -123,13 +123,12 @@ roomsRouter.post('/upload-image/:id', upload.single('roomsImage'), (req, res) =>
 
   try {
     con.query(`UPDATE rooms SET image = '${linkImage}' WHERE id = '${room_id}'`, function (err, result) {
-      if (err === null) {
-        return res.status(200).send({
-          image: linkImage
-        })
-      } else {
+      if (err) {
         return res.status(400).send("Error insert image")
       }
+      return res.status(201).send({
+        image: linkImage
+      })
     })
   } catch (err) {}
 })

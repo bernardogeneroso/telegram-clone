@@ -87,13 +87,12 @@ usersRouter.post('/upload-image', authenticateToken, upload.single('avatarImage'
 
   try {
     con.query(`UPDATE users SET image = '${linkImage}' WHERE id = '${user_id}'`, function (err, result) {
-      if (err === null) {
-        return res.status(200).send({
-          image: linkImage
-        })
-      } else {
-        return res.status(400).send("Error...")
+      if (err) {
+        return res.status(400).send("Error insert image")
       }
+      return res.status(201).send({
+        image: linkImage
+      })
     })
   } catch (err) {}
 })
