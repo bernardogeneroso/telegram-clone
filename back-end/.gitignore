@@ -1,4 +1,3 @@
 .node_modules
 mysql.js
 .env
-src/uploads/avatars/*

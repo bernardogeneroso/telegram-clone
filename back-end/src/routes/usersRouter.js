@@ -9,7 +9,7 @@ const StorageMulter = require('../configs/multer.js')
 const mysqlConnection = require('../../mysql.js')
 
 const upload = multer({
-  storage: StorageMulter
+  storage: StorageMulter.StorageAvatar
 })
 
 const con = mysql.createConnection(mysqlConnection);

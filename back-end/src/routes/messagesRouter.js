@@ -34,13 +34,13 @@ io.on("connection", (socket) => {
     try {
       con.query(`INSERT INTO rooms_messages (id_rooms, id_users, message) VALUES ('${room_id}', '${user_id}', '${message}')`, function (err, result) {
         if (err) {
-          res.status(400).send({
+          return res.status(400).send({
             error: err,
             error_message: "Error on create message"
           })
         }
   
-        res.status(201).send({
+        return res.status(201).send({
           id: result.insertId,
           message
         })
@@ -58,13 +58,13 @@ messagesRouter.post('/remove/:id', (req, res) => {
   try {
     con.query(`DELETE FROM rooms_messages WHERE id = '${id}' AND id_users = '${user_id}'`, function (err, result) {
       if (err) {
-        res.status(400).send({
+        return res.status(400).send({
           error: err,
           error_message: "Error on create message"
         })
       }
 
-      res.status(200).send()
+      return res.status(200).send()
     });
   } catch (err) {}
 })

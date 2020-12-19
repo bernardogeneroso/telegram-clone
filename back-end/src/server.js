@@ -13,6 +13,7 @@ app.use(cors())
 app.use(Routes)
 
 app.use('/avatars', express.static(path.resolve(__dirname, 'uploads', 'avatars')))
+app.use('/rooms-image', express.static(path.resolve(__dirname, 'uploads', 'rooms')))
 
 const port = process.env.PORT || 3333
 
