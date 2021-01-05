@@ -1,7 +1,8 @@
 import styled, { css } from 'styled-components'
 
 interface ContainerMessageInterface {
-  receive?: boolean
+  receive?: boolean;
+  checked?: boolean;
 }
 
 export const Container = styled.div`
@@ -79,11 +80,10 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
 
     svg {
       margin-left: 4px;
+      ${props => props.checked && css`
+        color: rgba(59, 157, 218, 1);
+      `}
     }
-  }
-
-  *, *:before, *:after {
-    box-sizing: inherit;
   }
 `
 

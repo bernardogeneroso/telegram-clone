@@ -16,6 +16,7 @@ export const Header = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
+  align-content: center;
 `
 
 export const HeaderSearchContainer = styled.div`

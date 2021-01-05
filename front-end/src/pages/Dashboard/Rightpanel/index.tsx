@@ -40,19 +40,19 @@ const Rightpanel: React.FC = () => {
       </Header>
       
       <ContainerMessages>
-        <ContainerMessage receive>
+        <ContainerMessage receive checked>
           <MessageContent>teste</MessageContent>
 
           <footer>15:02 <BiCheckDouble size={22} /></footer>
         </ContainerMessage>
 
-        <ContainerMessage>
+        <ContainerMessage checked>
           <MessageContent>teste</MessageContent>
 
           <footer>15:02 <BiCheckDouble size={22} /></footer>
         </ContainerMessage>
 
-        <ContainerMessage receive>
+        <ContainerMessage receive checked>
           <MessageContent>teste</MessageContent>
 
           <footer>15:02 <BiCheckDouble size={22} /></footer>
