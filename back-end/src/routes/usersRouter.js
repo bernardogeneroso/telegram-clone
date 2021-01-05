@@ -90,6 +90,7 @@ usersRouter.post('/upload-image', authenticateToken, upload.single('avatarImage'
       if (err) {
         return res.status(400).send("Error insert image")
       }
+      
       return res.status(201).send({
         image: linkImage
       })

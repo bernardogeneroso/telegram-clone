@@ -1,6 +1,5 @@
 const express = require('express')
 const dotenv = require('dotenv')
-const socketIO = require('socket.io')
 const mysql = require('mysql')
 
 const mysqlConnection = require('../../mysql.js')
@@ -8,48 +7,7 @@ const mysqlConnection = require('../../mysql.js')
 const con = mysql.createConnection(mysqlConnection);
 const messagesRouter = express.Router();
 
-const app = express()
-const server = app.listen()
 dotenv.config();
-
-const io = socketIO(server, {
-  cors: {
-    origin: '*',
-  }
-});
-
-//Sockets
-io.on("connection", (socket) => {
-  socket.on('leaveRoom', (room_id) => {
-    socket.leave("room"+room_id);
-  })
-
-  socket.on('newRoom', (room_id) => {
-    socket.join("room"+room_id);
-  })
-
-  socket.on('newMessage', (result) => {
-    const {room_id, user_id, message} = result
-
-    try {
-      con.query(`INSERT INTO rooms_messages (id_rooms, id_users, message) VALUES ('${room_id}', '${user_id}', '${message}')`, function (err, result) {
-        if (err) {
-          return res.status(400).send({
-            error: err,
-            error_message: "Error on create message"
-          })
-        }
-  
-        return res.status(201).send({
-          id: result.insertId,
-          message
-        })
-      });
-    } catch (err) {}
-
-    io.to("room"+room_id).emit('messageRoom', message);
-  })
-});
 
 messagesRouter.post('/remove/:id', (req, res) => {
   const {id} = req.params
