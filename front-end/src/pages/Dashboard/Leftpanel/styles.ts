@@ -7,6 +7,7 @@ interface ContentGroupInterface {
 export const Container = styled.div`
   max-width: 500px;
   width: 100%;
+  position: relative;
 `
 
 export const Header = styled.div`
@@ -112,4 +113,10 @@ export const ContentGroup = styled.div<ContentGroupInterface>`
       }
     }
   }
+`
+
+export const ContainerMenuFlutuante = styled.div`
+  position: absolute;
+  bottom: 8px;
+  right: 22px;
 `
