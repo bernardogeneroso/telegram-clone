@@ -69,20 +69,33 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
   `}
 
   footer {
-    margin-left: 16px;
+    width: 100%;
 
     font-size: 12px;
     display: flex;
     align-items: flex-end;
 
-    color: rgb(120, 120, 120, 0.8);
+    p {
+      margin-right: 10px;
 
-    svg {
-      margin-left: 4px;
-      ${props => props.checked && css`
-        color: rgba(59, 157, 218, 1);
-      `}
+      color: rgb(0, 106, 163);
     }
+
+    div {
+      display: flex;
+      align-items: flex-end;
+
+      color: rgb(120, 120, 120, 0.8);
+
+      svg {
+        margin-left: 4px;
+        ${props => props.checked && css`
+          color: rgba(59, 157, 218, 1);
+        `}
+      }
+    }
+
+    
   }
 `
 

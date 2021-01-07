@@ -6,7 +6,7 @@ import userDefault from '../assets/userDefault.png'
 
 interface User {
   id: string;
-  name: string;
+  fullname: string;
   email: string;
   image: string;
 }

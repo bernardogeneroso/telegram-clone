@@ -48,4 +48,25 @@ messagesRouter.post('/rename-message', (req, res) => {
   } catch (err) {}
 })
 
+messagesRouter.get('/:id', (req, res) => {
+  const {id: room_id} = req.params
+
+  try {
+    con.query(`SELECT rm.id, rm.message, rm.message_timestamp, u.fullname
+    FROM rooms_messages AS rm
+    INNER JOIN users AS u
+    ON rm.id_users = u.id
+    WHERE rm.id_rooms = '${room_id}'`, function (err, result) {
+      if (err) {
+        res.status(400).send({
+          error: err,
+          error_message: "Error on get messages of room"
+        })
+      }
+
+      res.status(200).send(result)
+    });
+  } catch (err) {}
+})
+
 module.exports = messagesRouter

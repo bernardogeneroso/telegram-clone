@@ -51,7 +51,7 @@ usersRouter.post('/sessions', (req, res) => {
 
   try {
     con.query(`SELECT * FROM users WHERE email='${email}';`, async function (err, result) {
-      if (result[0]) {
+      if (result !== undefined || result[0]) {
         const user = result[0]
 
         const secret = process.env.ACCESS_TOKEN_SECRET

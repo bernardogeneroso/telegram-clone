@@ -4,6 +4,7 @@ const multer = require('multer')
 
 const StorageMulter = require('../configs/multer.js')
 const mysqlConnection = require('../../mysql.js')
+const authenticateToken = require('../middlewares/authenticateToken.js')
 
 const con = mysql.createConnection(mysqlConnection);
 const roomsRouter = express.Router();
@@ -12,10 +13,25 @@ const upload = multer({
   storage: StorageMulter.StorageRooms
 })
 
-roomsRouter.get('/', (req, res) => {
+roomsRouter.get('/:id', authenticateToken, (req, res) => {
+  const {id:user_id} = req.params 
+
   try {
-    con.query("SELECT * FROM rooms;", function (err, result) {
-      return res.status(201).send(result)
+    con.query(`SELECT r.id, r.name, r.image, u.fullname, rlm.user_message, rlm.user_date
+    FROM rooms AS r
+    LEFT JOIN rooms_users AS ru 
+    ON r.id = ru.id_rooms
+    LEFT JOIN rooms_lastmessage as rlm
+    ON rlm.id_rooms = ru.id_rooms
+    LEFT JOIN users AS u
+    ON rlm.id_users = u.id
+    WHERE ru.id_users = '${user_id}'`, function (err, result) {
+      if (err) throw err
+      if (result !== undefined) {        
+        return res.status(200).send(result)
+      } else {
+        return res.status(404).send()
+      }
     });
   } catch (err) {}
 })

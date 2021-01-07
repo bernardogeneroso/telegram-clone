@@ -1,17 +1,39 @@
-import React, {useState, useCallback} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {IconButton} from '@material-ui/core'
 import {Search, Call, Info, MoreVert, AttachFile, SentimentSatisfiedOutlined, MicNone, Send, Menu} from '@material-ui/icons'
 import {BiCheckDouble} from 'react-icons/bi'
+import {format, parseISO} from 'date-fns'
 
 import { Container, Header, ContainerMessages, ContainerMessage, MessageContent, Footer } from "./styles";
 
+import { useAuth } from '../../../hooks/Auth'
+import {Rooms} from '../Leftpanel'
+import api from '../../../services/api';
+
+interface Messages {
+  id: number;
+  message: string;
+  message_timestamp: string;
+  fullname: string;
+}
+
 interface RightPanelParams {
   openDrawer: boolean;
+  roomSelected: Rooms;
   handleToggleDrawerOpen: () => void;
 }
 
-const RightPanel = ({openDrawer, handleToggleDrawerOpen}: RightPanelParams) => {
+const RightPanel = ({openDrawer, roomSelected, handleToggleDrawerOpen}: RightPanelParams) => {
+  const {data} = useAuth()
+
   const [searchInput, setSearchInput] = useState("")
+  const [messages, setMessages] = useState<Messages[]>([])
+
+  useEffect(() => {
+    api.get(`/messages/${roomSelected.id}`).then(result => {
+      setMessages(result.data)
+    })
+  }, [roomSelected.id])
 
   const handleSearchInput = useCallback(
     (event) => {
@@ -36,10 +58,14 @@ const RightPanel = ({openDrawer, handleToggleDrawerOpen}: RightPanelParams) => {
           )
         }
 
-        <div>
-          <span>Steven Martins</span>
-          <p>last seen 1 hour ago</p>
-        </div>
+        {
+          roomSelected && (
+            <div>
+              <span>{roomSelected.name}</span>
+              <p>last seen 1 hour ago {roomSelected.user_date}</p>
+            </div>
+          )
+        }
 
         <div className="header-right-icons">
           <IconButton>
@@ -58,23 +84,23 @@ const RightPanel = ({openDrawer, handleToggleDrawerOpen}: RightPanelParams) => {
       </Header>
       
       <ContainerMessages>
-        <ContainerMessage receive checked>
-          <MessageContent>teste</MessageContent>
+        {
+          messages && messages.map((message) => (
+            <ContainerMessage key={message.id} receive={message.fullname === data.user.fullname ? true : false} checked>
+              <MessageContent>{message.message}</MessageContent>
 
-          <footer>15:02 <BiCheckDouble size={22} /></footer>
-        </ContainerMessage>
-
-        <ContainerMessage checked>
-          <MessageContent>teste</MessageContent>
-
-          <footer>15:02 <BiCheckDouble size={22} /></footer>
-        </ContainerMessage>
-
-        <ContainerMessage receive checked>
-          <MessageContent>teste</MessageContent>
-
-          <footer>15:02 <BiCheckDouble size={22} /></footer>
-        </ContainerMessage>
+              <footer>
+                <p>
+                  {message.fullname}
+                </p>
+                
+                <div>
+                  {format(parseISO(message.message_timestamp), 'k:m')} <BiCheckDouble size={22} />
+                </div>
+              </footer>
+            </ContainerMessage>
+          ))
+        }
       </ContainerMessages>
 
       <Footer>

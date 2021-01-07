@@ -3,19 +3,37 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider} from '@material-ui/core'
 import {Add, ChevronLeft, ChevronRight} from '@material-ui/icons'
 import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai";
+import {format, parseISO} from 'date-fns'
+
+import api from '../../../services/api';
+import { useAuth } from '../../../hooks/Auth';
 
 import { Container, Header, HeaderSearchContainer, ContainerGroup, ContentGroup, ContainerMenuFlutuante } from "./styles";
+
+export interface Rooms {
+  id: string;
+  name: string;
+  image: string;
+  fullname: string;
+  user_message: string;
+  user_date: string;
+}
 
 interface LeftPanelParams {
   openDrawer: boolean;
   drawerWidth: number;
+  roomSelected: Rooms;
   handleToggleDrawerOpen: () => void;
+  handleRoomSelected: (rooms: Rooms) => void;
 }
 
-const Leftpanel = ({openDrawer, drawerWidth, handleToggleDrawerOpen}: LeftPanelParams) => {
+const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpen, handleRoomSelected}: LeftPanelParams) => {
+  const { data } = useAuth();
+
   const [searchFind, setSearchFind] = useState<boolean>(false);
   const [openMenuFlutuante, setOpenMenuFlutuante] = useState(false);
   const [openDialogCreateRoom, setOpenDialogCreateRoom] = useState(false);
+  const [rooms, setRooms] = useState<Rooms[]>([])
 
   const buttonMenuFlutuanteRef = useRef<HTMLButtonElement>(null);
   const prevOpen = useRef(openMenuFlutuante);
@@ -88,6 +106,12 @@ const Leftpanel = ({openDrawer, drawerWidth, handleToggleDrawerOpen}: LeftPanelP
     prevOpen.current = openMenuFlutuante;
   }, [openMenuFlutuante]);
 
+  useEffect(() => {
+    api.get(`/rooms/${data.user.id}`).then(result => {
+      setRooms(result.data)
+    })
+  }, [data.user.id])
+
   const handleToogleDialog = useCallback(() => {
     setOpenDialogCreateRoom(value => !value)
   }, [])
@@ -145,80 +169,31 @@ const Leftpanel = ({openDrawer, drawerWidth, handleToggleDrawerOpen}: LeftPanelP
         </div>
         <Divider />
         <ContainerGroup>
-          <ContentGroup>
-            <div>
-              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-            </div>
 
-            <div>
-              <header>
-                <span>Steven Martins</span>
-                <time>12.11.2020</time>
-              </header>
+          {
+            rooms && rooms.map((room) => (
+              <ContentGroup
+                selected={roomSelected.id === room.id ? true : false} 
+                key={room.id} 
+                onClick={() => handleRoomSelected(room)}
+              >
+                <div>
+                  <img src={room.image} alt={room.name} />
+                </div>
 
-              <p><span>You: </span>Noob</p>
-            </div>
-          </ContentGroup>
+                <div>
+                  <header>
+                    <span>{room.name}</span>
+                    {room.user_message && <time>{format(parseISO(room.user_date), 'd.MM.Y')}</time>}
+                  </header>
+             
 
-          <ContentGroup selected>
-            <div>
-              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-            </div>
-
-            <div>
-              <header>
-                <span>Steven Martins</span>
-                <time>12.11.2020</time>
-              </header>
-
-              <p><span>You: </span>Noob</p>
-            </div>
-          </ContentGroup>
-
-          <ContentGroup>
-            <div>
-              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-            </div>
-
-            <div>
-              <header>
-                <span>Steven Martins</span>
-                <time>12.11.2020</time>
-              </header>
-
-              <p><span>You: </span>Noob</p>
-            </div>
-          </ContentGroup>
-
-          <ContentGroup>
-            <div>
-              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-            </div>
-
-            <div>
-              <header>
-                <span>Steven Martins</span>
-                <time>12.11.2020</time>
-              </header>
-
-              <p><span>You: </span>Noob</p>
-            </div>
-          </ContentGroup>
-
-          <ContentGroup>
-            <div>
-              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-            </div>
-
-            <div>
-              <header>
-                <span>Steven Martins</span>
-                <time>12.11.2020</time>
-              </header>
-
-              <p><span>You: </span>Noob</p>
-            </div>
-          </ContentGroup>
+                  {room.user_message && <p><span>{room.fullname}: </span>{room.user_message}</p>}
+                </div>
+              </ContentGroup>
+            ))
+          }
+          
         </ContainerGroup>
       </Drawer>
 
