@@ -1,18 +1,23 @@
 import styled, { css } from 'styled-components'
 
+interface ContainerInterface {
+  drawerWidth: number
+}
+
 interface ContentGroupInterface {
   selected?: boolean;
 }
 
-export const Container = styled.div`
-  max-width: 500px;
-  width: 100%;
+export const Container = styled.div<ContainerInterface>`
+  width: ${props => props.drawerWidth}px;
   position: relative;
+
+  transition: all ease 0.4s;
 `
 
 export const Header = styled.div`
   height: 55px;
-  padding: 10px 12px 10px 12px;
+  padding: 10px 10px 10px 0;
 
   flex: 1;
   display: flex;
@@ -53,17 +58,13 @@ export const HeaderSearchContainer = styled.div`
 `
 
 export const ContainerGroup = styled.div`
-  height: calc(100% - 55px);
+  height: 100%;
   width: 100%;
   overflow-y: auto;
-  display: flex;
-  flex: 1;
-  flex-direction: inherit;
-  flex-wrap: wrap;
 `
 
 export const ContentGroup = styled.div<ContentGroupInterface>`
-  height: auto;
+  height: 85px;
   width: 100%;
 
   display: flex;

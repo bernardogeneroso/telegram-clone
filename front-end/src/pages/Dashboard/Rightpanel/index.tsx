@@ -1,11 +1,16 @@
 import React, {useState, useCallback} from 'react'
 import {IconButton} from '@material-ui/core'
-import {Search, Call, Info, MoreVert, AttachFile, SentimentSatisfiedOutlined, MicNone, Send} from '@material-ui/icons'
+import {Search, Call, Info, MoreVert, AttachFile, SentimentSatisfiedOutlined, MicNone, Send, Menu} from '@material-ui/icons'
 import {BiCheckDouble} from 'react-icons/bi'
 
 import { Container, Header, ContainerMessages, ContainerMessage, MessageContent, Footer } from "./styles";
 
-const Rightpanel: React.FC = () => {
+interface RightPanelParams {
+  openDrawer: boolean;
+  handleToggleDrawerOpen: () => void;
+}
+
+const RightPanel = ({openDrawer, handleToggleDrawerOpen}: RightPanelParams) => {
   const [searchInput, setSearchInput] = useState("")
 
   const handleSearchInput = useCallback(
@@ -18,12 +23,25 @@ const Rightpanel: React.FC = () => {
   return (
     <Container>
       <Header>
+        {
+          !openDrawer && (
+            <IconButton 
+              onClick={handleToggleDrawerOpen}
+              style={{
+                marginRight: 12
+              }}
+            >
+              <Menu />
+            </IconButton>
+          )
+        }
+
         <div>
           <span>Steven Martins</span>
           <p>last seen 1 hour ago</p>
         </div>
 
-        <div>
+        <div className="header-right-icons">
           <IconButton>
             <Search style={{opacity: 0.6}} />
           </IconButton>
@@ -86,4 +104,4 @@ const Rightpanel: React.FC = () => {
   )
 }
 
-export default Rightpanel
+export default RightPanel

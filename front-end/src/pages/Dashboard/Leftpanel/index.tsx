@@ -1,41 +1,85 @@
-import React, {useState, useMemo, useRef, useCallback} from 'react'
-import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField} from '@material-ui/core'
-import {Menu, Add} from '@material-ui/icons'
+import React, {useState, useEffect, useMemo, useRef, useCallback} from 'react'
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider} from '@material-ui/core'
+import {Add, ChevronLeft, ChevronRight} from '@material-ui/icons'
 import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai";
 
 import { Container, Header, HeaderSearchContainer, ContainerGroup, ContentGroup, ContainerMenuFlutuante } from "./styles";
-import { useEffect } from 'react';
 
-const Leftpanel: React.FC = () => {
+interface LeftPanelParams {
+  openDrawer: boolean;
+  drawerWidth: number;
+  handleToggleDrawerOpen: () => void;
+}
+
+const Leftpanel = ({openDrawer, drawerWidth, handleToggleDrawerOpen}: LeftPanelParams) => {
   const [searchFind, setSearchFind] = useState<boolean>(false);
   const [openMenuFlutuante, setOpenMenuFlutuante] = useState(false);
-  const [openDialogCreateRoom, setOpenDialogCreateRoom] = React.useState(false);
-
-  const handleToogleDialog = useCallback(() => {
-    setOpenDialogCreateRoom(value => !value)
-  }, [])
+  const [openDialogCreateRoom, setOpenDialogCreateRoom] = useState(false);
 
   const buttonMenuFlutuanteRef = useRef<HTMLButtonElement>(null);
   const prevOpen = useRef(openMenuFlutuante);
 
-  const handleToggle = () => {
-    setOpenMenuFlutuante((prevOpen) => !prevOpen);
-  };
-
-  const handleCloseMenuFlutuante = (event: any) => {
-    if (buttonMenuFlutuanteRef.current && buttonMenuFlutuanteRef.current.contains(event.target)) {
-      return;
+  const useStyles = makeStyles((theme) => ({
+    root: {
+      display: "flex"
+    },
+    appBar: {
+      transition: theme.transitions.create(["margin", "width"], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      })
+    },
+    appBarShift: {
+      width: `calc(100% - ${drawerWidth}px)`,
+      marginLeft: drawerWidth,
+      transition: theme.transitions.create(["margin", "width"], {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen
+      })
+    },
+    menuButton: {
+      marginRight: theme.spacing(2)
+    },
+    hide: {
+      display: "none"
+    },
+    drawer: {
+      width: drawerWidth,
+      flexShrink: 0
+    },
+    drawerPaper: {
+      width: drawerWidth,
+      zIndex: 0
+    },
+    drawerHeader: {
+      display: "flex",
+      alignItems: "center",
+      padding: theme.spacing(0, 1),
+      justifyContent: "flex-end",
+      height: 55
+    },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      }),
+      marginLeft: -drawerWidth
+    },
+    contentShift: {
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen
+      }),
+      marginLeft: 0
     }
+  }));
 
-    setOpenMenuFlutuante(false);
-  };
+  const classes = useStyles();
+  const theme = useTheme();
 
-  function handleListKeyDown(event: any) {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      setOpenMenuFlutuante(false);
-    }
-  }
   useEffect(() => {
     if (prevOpen.current === true && openMenuFlutuante === false && buttonMenuFlutuanteRef.current !== null) {
       buttonMenuFlutuanteRef.current.focus();
@@ -44,326 +88,139 @@ const Leftpanel: React.FC = () => {
     prevOpen.current = openMenuFlutuante;
   }, [openMenuFlutuante]);
 
+  const handleToogleDialog = useCallback(() => {
+    setOpenDialogCreateRoom(value => !value)
+  }, [])
+
+  const handleToggle = useCallback(() => {
+    setOpenMenuFlutuante((prevOpen) => !prevOpen);
+  }, [])
+
+  const handleCloseMenuFlutuante = useCallback((event: any) => {
+    if (buttonMenuFlutuanteRef.current && buttonMenuFlutuanteRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpenMenuFlutuante(false);
+  }, [])
+
+  const handleListKeyDown = useCallback((event: any) => {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpenMenuFlutuante(false);
+    }
+  }, [])
+
   const eventHandlersSearch = useMemo(() => ({
     onFocus: () => setSearchFind(true),
     onBlur: () => setSearchFind(false),
   }), []);
 
   return (
-    <Container>
-      <Header>        
-        <IconButton>
-          <Menu style={{opacity: 0.8}} />
-        </IconButton>
+    <Container drawerWidth={drawerWidth}>
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="left"
+        open={openDrawer}
+        classes={{
+          paper: classes.drawerPaper
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <Header>        
+            <HeaderSearchContainer>
+              <input name="search" type="text" placeholder="Search" {...eventHandlersSearch}/>
+              
+              {!searchFind ? <AiOutlineSearch size={18} /> : <AiOutlineClose size={18} />}
+            </HeaderSearchContainer>
+          </Header>
+          <IconButton onClick={handleToggleDrawerOpen}>
+            {theme.direction === "ltr" ? (
+              <ChevronLeft />
+            ) : (
+              <ChevronRight />
+            )}
+          </IconButton>
+        </div>
+        <Divider />
+        <ContainerGroup>
+          <ContentGroup>
+            <div>
+              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
+            </div>
 
-        <HeaderSearchContainer>
-          <input name="search" type="text" placeholder="Search" {...eventHandlersSearch}/>
-          
-          {!searchFind ? <AiOutlineSearch size={18} /> : <AiOutlineClose size={18} />}
-        </HeaderSearchContainer>
-      </Header>
+            <div>
+              <header>
+                <span>Steven Martins</span>
+                <time>12.11.2020</time>
+              </header>
 
-      <ContainerGroup>
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
+              <p><span>You: </span>Noob</p>
+            </div>
+          </ContentGroup>
 
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
+          <ContentGroup selected>
+            <div>
+              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
+            </div>
 
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
+            <div>
+              <header>
+                <span>Steven Martins</span>
+                <time>12.11.2020</time>
+              </header>
 
-        <ContentGroup selected>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
+              <p><span>You: </span>Noob</p>
+            </div>
+          </ContentGroup>
 
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
+          <ContentGroup>
+            <div>
+              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
+            </div>
 
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
+            <div>
+              <header>
+                <span>Steven Martins</span>
+                <time>12.11.2020</time>
+              </header>
 
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
+              <p><span>You: </span>Noob</p>
+            </div>
+          </ContentGroup>
 
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
+          <ContentGroup>
+            <div>
+              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
+            </div>
 
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
+            <div>
+              <header>
+                <span>Steven Martins</span>
+                <time>12.11.2020</time>
+              </header>
 
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
+              <p><span>You: </span>Noob</p>
+            </div>
+          </ContentGroup>
 
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
+          <ContentGroup>
+            <div>
+              <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
+            </div>
 
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
+            <div>
+              <header>
+                <span>Steven Martins</span>
+                <time>12.11.2020</time>
+              </header>
 
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-
-        <ContentGroup>
-          <div>
-            <img src="https://web.telegram.org/img/logo_share.png" alt="Avatar-telegram"/>
-          </div>
-
-          <div>
-            <header>
-              <span>Steven Martins</span>
-              <time>12.11.2020</time>
-            </header>
-
-            <p><span>You: </span>Noob</p>
-          </div>
-        </ContentGroup>
-      </ContainerGroup>
+              <p><span>You: </span>Noob</p>
+            </div>
+          </ContentGroup>
+        </ContainerGroup>
+      </Drawer>
 
       <ContainerMenuFlutuante>
         <Button
@@ -375,7 +232,7 @@ const Leftpanel: React.FC = () => {
             marginTop: 200
           }}
         >
-          <Fab color="primary" aria-label="add">
+          <Fab aria-label="add">
             <Add />
           </Fab>
         </Button>
@@ -405,7 +262,7 @@ const Leftpanel: React.FC = () => {
                       handleCloseMenuFlutuante(event); 
                       handleToogleDialog();
                     }}>
-                        Nova conversa
+                        Nova sala
                     </MenuItem>
                   </MenuList>
                 </ClickAwayListener>
@@ -415,10 +272,10 @@ const Leftpanel: React.FC = () => {
         </Popper>
 
         <Dialog open={openDialogCreateRoom} onClose={handleToogleDialog} aria-labelledby="form-dialog-title">
-          <DialogTitle id="form-dialog-title">Cria uma sala</DialogTitle>
+          <DialogTitle id="form-dialog-title">Cria sala</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Crie uma nova sala, para conversar com os seus amigos...
+              Crie uma sala, para conversar com os seus amigos...
             </DialogContentText>
             <TextField
               autoFocus

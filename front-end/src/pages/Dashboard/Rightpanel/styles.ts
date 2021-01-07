@@ -7,8 +7,6 @@ interface ContainerMessageInterface {
 
 export const Container = styled.div`
   width: 100%;
-
-  border-left: 0.2px solid rgba(120, 120, 120,.2);
 `
 
 export const Header = styled.div`
@@ -16,13 +14,10 @@ export const Header = styled.div`
 
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap-reverse;
-
   padding: 6px 12px;
 
   font-size: 14px;
 
-  justify-content: space-between;
   align-items: center;
 
   div:nth-child(1) {
@@ -33,6 +28,10 @@ export const Header = styled.div`
     p {
       color: rgba(120, 120, 120, 0.8);
     }
+  }
+
+  & .header-right-icons {
+    margin-left: auto;
   }
 `
 
@@ -49,8 +48,9 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
   width: fit-content;
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: wrap;
+  align-items: flex-end;
 
   & + div {
     margin-top: 16px;
@@ -69,7 +69,6 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
   `}
 
   footer {
-    margin-top: 8px;
     margin-left: 16px;
 
     font-size: 12px;
@@ -88,6 +87,8 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
 `
 
 export const MessageContent = styled.div`
+  width: 100%;
+  max-width: 250px;
   font-size: 14px;
   color: #000;
 `
@@ -95,7 +96,6 @@ export const MessageContent = styled.div`
 export const Footer = styled.div`
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   align-items: center;
 
   .file:nth-child(1) {
