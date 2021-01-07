@@ -1,5 +1,7 @@
 import styled, { css } from 'styled-components'
 
+import backgroundUrl from '../../../assets/background-url.jpg'
+
 interface ContainerInterface {
   drawerWidth: number
 }
@@ -11,6 +13,8 @@ interface ContentGroupInterface {
 export const Container = styled.div<ContainerInterface>`
   width: ${props => props.drawerWidth}px;
   position: relative;
+
+  background-image: url(${backgroundUrl});
 
   transition: all ease 0.4s;
 `
@@ -61,6 +65,23 @@ export const ContainerGroup = styled.div`
   height: 100%;
   width: 100%;
   overflow-y: auto;
+
+  ::-webkit-scrollbar {
+    width: 6px!important;
+    height: 6px!important;
+  }
+  & .dark ::-webkit-scrollbar-thumb {
+      background-color: hsla(0,0%,100%,.16);
+  }
+  ::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,.2);
+  }
+  & .dark ::-webkit-scrollbar-track {
+      background-color: initial;
+  }
+  ::-webkit-scrollbar-track {
+      background: hsla(0,0%,100%,.1);
+  }
 `
 
 export const ContentGroup = styled.div<ContentGroupInterface>`
@@ -118,6 +139,6 @@ export const ContentGroup = styled.div<ContentGroupInterface>`
 
 export const ContainerMenuFlutuante = styled.div`
   position: absolute;
-  bottom: 8px;
-  right: 22px;
+  bottom: 10px;
+  right: 10px;
 `
