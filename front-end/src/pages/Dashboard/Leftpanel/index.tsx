@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useMemo, useRef, useCallback} from 'react'
 import { makeStyles, useTheme } from "@material-ui/core/styles";
-import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider} from '@material-ui/core'
+import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, Menu, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider, Avatar} from '@material-ui/core'
 import {Add, ChevronLeft, ChevronRight} from '@material-ui/icons'
 import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai";
 import {format, parseISO} from 'date-fns'
@@ -152,6 +152,14 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
         }}
       >
         <div className={classes.drawerHeader}>
+          <Button aria-controls="fade-menu" aria-haspopup="true" style={{
+              minWidth: 'auto',
+              padding: 2
+            }}
+          >
+            <Avatar alt={data.user.fullname} src={data.user.image} />
+          </Button>
+          
           <Header>        
             <HeaderSearchContainer>
               <input name="search" type="text" placeholder="Search" {...eventHandlersSearch}/>
@@ -159,13 +167,17 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
               {!searchFind ? <AiOutlineSearch size={18} /> : <AiOutlineClose size={18} />}
             </HeaderSearchContainer>
           </Header>
-          <IconButton onClick={handleToggleDrawerOpen}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeft />
-            ) : (
-              <ChevronRight />
-            )}
-          </IconButton>
+          {
+            Object.keys(roomSelected).length !== 0 && (
+              <IconButton onClick={handleToggleDrawerOpen}>
+                {theme.direction === "ltr" ? (
+                  <ChevronLeft />
+                ) : (
+                  <ChevronRight />
+                )}
+              </IconButton>
+            )
+          }
         </div>
         <Divider />
         <ContainerGroup>
@@ -237,7 +249,7 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
                       handleCloseMenuFlutuante(event); 
                       handleToogleDialog();
                     }}>
-                        Nova sala
+                        Novo grupo
                     </MenuItem>
                   </MenuList>
                 </ClickAwayListener>
@@ -247,16 +259,16 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
         </Popper>
 
         <Dialog open={openDialogCreateRoom} onClose={handleToogleDialog} aria-labelledby="form-dialog-title">
-          <DialogTitle id="form-dialog-title">Cria sala</DialogTitle>
+          <DialogTitle id="form-dialog-title">Criar grupo</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Crie uma sala, para conversar com os seus amigos...
+              Crie um grupo, para conversar com os seus amigos...
             </DialogContentText>
             <TextField
               autoFocus
               margin="dense"
               id="name"
-              label="Nome sala"
+              label="Nome do grupo"
               type="text"
               fullWidth
             />
@@ -271,6 +283,22 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
           </DialogActions>
         </Dialog>
       </ContainerMenuFlutuante>
+
+      {
+        /*
+        <Menu
+          id="fade-menu"
+          anchorEl={anchorEl}
+          keepMounted
+          open={openAvatarMemu}
+          onClose={handleToogleAvatarMenu}
+          TransitionComponent={Fade}
+        >
+          <MenuItem onClick={handleToogleAvatarMenu}>Profile</MenuItem>
+          <MenuItem onClick={handleToogleAvatarMenu}>My account</MenuItem>
+          <MenuItem onClick={handleToogleAvatarMenu}>Logout</MenuItem>
+        </Menu>*/
+      }
     </Container>
   )
 }

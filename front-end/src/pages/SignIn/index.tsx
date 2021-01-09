@@ -45,7 +45,7 @@ const SignIn = () => {
           abortEarly: false,
         });
 
-        await signIn({ email: data.email, secret_password: data.password });
+        await signIn({ email: data.email, secret_password: data.password })
 
         history.push("/dashboard");
       } catch (err) {

@@ -142,3 +142,14 @@ export const ContainerMenuFlutuante = styled.div`
   bottom: 10px;
   right: 10px;
 `
+
+export const AvatarProfile = styled.div`
+  height: 40px;
+  border-radius: 50%;
+
+  img {
+    height: 40px;
+    width: 45px;
+    border-radius: 50%;
+  }
+`

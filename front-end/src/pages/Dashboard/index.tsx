@@ -4,6 +4,8 @@ import {Sockets} from "../../hooks/Sockets";
 
 import Leftpanel from './Leftpanel'
 import Rightpanel from './Rightpanel'
+import Righpanelnotselected from './Righpanelnotselected'
+
 
 import {Rooms} from './Leftpanel'
 
@@ -28,8 +30,7 @@ const Dashboard = () => {
 
   const handleRoomSelected = useCallback((room: Rooms) => {
     setRoomSelected(room)
-  },[]
-)
+  },[])
 
   return (
     <Sockets>
@@ -42,11 +43,17 @@ const Dashboard = () => {
           handleRoomSelected={handleRoomSelected}
         />
         
-        <Rightpanel 
-          openDrawer={openDrawer}
-          roomSelected={roomSelected}
-          handleToggleDrawerOpen={handleToggleDrawerOpen} 
-        />
+        {
+          Object.keys(roomSelected).length !== 0 ? (
+            <Rightpanel 
+              openDrawer={openDrawer}
+              roomSelected={roomSelected}
+              handleToggleDrawerOpen={handleToggleDrawerOpen} 
+            />
+          ) : (
+            <Righpanelnotselected />
+          )
+        }
       </Container>
     </Sockets>
   );
