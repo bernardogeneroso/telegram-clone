@@ -1,14 +1,14 @@
-import React, {useState, useEffect, useMemo, useRef, useCallback} from 'react'
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import {IconButton, Fab, Popper, Grow, Paper, ClickAwayListener, Menu, MenuList, MenuItem, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider, Avatar} from '@material-ui/core'
-import {Add, ChevronLeft, ChevronRight} from '@material-ui/icons'
+import React, {useState, useEffect, useMemo, useRef, useCallback, RefObject} from 'react'
+import { makeStyles } from "@material-ui/core/styles";
+import {IconButton, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider, Avatar, SwipeableDrawer, List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Switch} from '@material-ui/core'
+import {ChevronLeft, PeopleAltOutlined, NightsStayOutlined, ExitToApp, Menu} from '@material-ui/icons'
 import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai";
 import {format, parseISO} from 'date-fns'
 
 import api from '../../../services/api';
 import { useAuth } from '../../../hooks/Auth';
 
-import { Container, Header, HeaderSearchContainer, ContainerGroup, ContentGroup, ContainerMenuFlutuante } from "./styles";
+import { Container, Header, HeaderSearchContainer, HeaderDrawerMenu, ContainerGroup, ContentGroup } from "./styles";
 
 export interface Rooms {
   id: string;
@@ -23,20 +23,21 @@ interface LeftPanelParams {
   openDrawer: boolean;
   drawerWidth: number;
   roomSelected: Rooms;
+  refInputSearch: RefObject<HTMLInputElement>;
   handleToggleDrawerOpen: () => void;
   handleRoomSelected: (rooms: Rooms) => void;
 }
 
-const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpen, handleRoomSelected}: LeftPanelParams) => {
-  const { data } = useAuth();
+const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handleToggleDrawerOpen, handleRoomSelected}: LeftPanelParams) => {
+  const { data, signOut } = useAuth();
 
-  const [searchFind, setSearchFind] = useState<boolean>(false);
-  const [openMenuFlutuante, setOpenMenuFlutuante] = useState(false);
-  const [openDialogCreateRoom, setOpenDialogCreateRoom] = useState(false);
+  const [searchFind, setSearchFind] = useState<boolean>(false)
+  const [openDialogCreateRoom, setOpenDialogCreateRoom] = useState<boolean>(false)
+  const [openDrawerMenuAvatar, setOpenDrawerMenuAvatar] = useState<boolean>(false)
+  const [nightMode, setNightMode] = useState<boolean>(false)
   const [rooms, setRooms] = useState<Rooms[]>([])
 
-  const buttonMenuFlutuanteRef = useRef<HTMLButtonElement>(null);
-  const prevOpen = useRef(openMenuFlutuante);
+  const buttonMenuFlutuanteAvatarRef = useRef<HTMLButtonElement>(null);
 
   const useStyles = makeStyles((theme) => ({
     root: {
@@ -77,34 +78,15 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
       justifyContent: "flex-end",
       height: 55
     },
-    content: {
-      flexGrow: 1,
-      padding: theme.spacing(3),
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      marginLeft: -drawerWidth
+    list: {
+      width: 300,
     },
-    contentShift: {
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen
-      }),
-      marginLeft: 0
+    fullList: {
+      width: 'auto',
     }
   }));
 
   const classes = useStyles();
-  const theme = useTheme();
-
-  useEffect(() => {
-    if (prevOpen.current === true && openMenuFlutuante === false && buttonMenuFlutuanteRef.current !== null) {
-      buttonMenuFlutuanteRef.current.focus();
-    }
-
-    prevOpen.current = openMenuFlutuante;
-  }, [openMenuFlutuante]);
 
   useEffect(() => {
     api.get(`/rooms/${data.user.id}`).then(result => {
@@ -116,24 +98,16 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
     setOpenDialogCreateRoom(value => !value)
   }, [])
 
-  const handleToggle = useCallback(() => {
-    setOpenMenuFlutuante((prevOpen) => !prevOpen);
+  const handleToogleMenuDrawerMenu = useCallback(() => {
+    setOpenDrawerMenuAvatar((prevOpen) => !prevOpen);
   }, [])
 
-  const handleCloseMenuFlutuante = useCallback((event: any) => {
-    if (buttonMenuFlutuanteRef.current && buttonMenuFlutuanteRef.current.contains(event.target)) {
-      return;
-    }
-
-    setOpenMenuFlutuante(false);
-  }, [])
-
-  const handleListKeyDown = useCallback((event: any) => {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      setOpenMenuFlutuante(false);
-    }
-  }, [])
+  const handleToggleNightMode = useCallback(
+    () => {
+      setNightMode(value => !value)
+    },
+    [],
+  )
 
   const eventHandlersSearch = useMemo(() => ({
     onFocus: () => setSearchFind(true),
@@ -152,17 +126,91 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
         }}
       >
         <div className={classes.drawerHeader}>
-          <Button aria-controls="fade-menu" aria-haspopup="true" style={{
+          <Button 
+            ref={buttonMenuFlutuanteAvatarRef} 
+            aria-controls={openDrawer ? 'menu-list-grow' : undefined} 
+            aria-haspopup="true" style={{
               minWidth: 'auto',
-              padding: 2
             }}
+            onClick={handleToogleMenuDrawerMenu}
           >
-            <Avatar alt={data.user.fullname} src={data.user.image} />
+            <Menu />
           </Button>
+
+          <SwipeableDrawer
+            anchor='left'
+            open={openDrawerMenuAvatar}
+            onClose={handleToogleMenuDrawerMenu}
+            onOpen={handleToogleMenuDrawerMenu}
+          >
+            <div
+              className={classes.list}
+              role="presentation"
+            >
+              <HeaderDrawerMenu>
+                <div>
+                  <Avatar alt={data.user.fullname} src={data.user.image} />
+
+                  <IconButton 
+                    style={{
+                      color: '#fff'
+                    }}
+                    onClick={handleToogleMenuDrawerMenu}
+                  >
+                    <ChevronLeft />
+                  </IconButton>
+                </div>
+
+                <p>{data.user.fullname}</p>
+              </HeaderDrawerMenu>
+              <List>
+                <ListItem 
+                  button 
+                  style={{
+                    padding: '10px 22px'
+                  }}
+                  onClick={handleToogleDialog}
+                >
+                  <ListItemIcon><PeopleAltOutlined /></ListItemIcon>
+                  <ListItemText primary="New Group" />
+                </ListItem>
+                <ListItem 
+                    button 
+                    style={{
+                    padding: '10px 22px'
+                  }}
+                >
+                  <ListItemIcon><NightsStayOutlined /></ListItemIcon>
+                  <ListItemText primary="Night Mode" />
+                  <ListItemSecondaryAction>
+                    <Switch
+                      checked={nightMode}
+                      onChange={handleToggleNightMode}
+                      name="nightModeChecked"
+                      color="primary"
+                      style={{
+                        height: 39
+                      }}
+                    />
+                  </ListItemSecondaryAction>
+                </ListItem>
+                <ListItem 
+                  button 
+                  style={{
+                    padding: '10px 22px'
+                  }}
+                  onClick={signOut}
+                >
+                  <ListItemIcon><ExitToApp /></ListItemIcon>
+                  <ListItemText primary="Log Out" />
+                </ListItem>
+              </List>
+            </div>
+          </SwipeableDrawer>
           
           <Header>        
             <HeaderSearchContainer>
-              <input name="search" type="text" placeholder="Search" {...eventHandlersSearch}/>
+              <input name="search" type="text" placeholder="Search" ref={refInputSearch} {...eventHandlersSearch}/>
               
               {!searchFind ? <AiOutlineSearch size={18} /> : <AiOutlineClose size={18} />}
             </HeaderSearchContainer>
@@ -170,11 +218,7 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
           {
             Object.keys(roomSelected).length !== 0 && (
               <IconButton onClick={handleToggleDrawerOpen}>
-                {theme.direction === "ltr" ? (
-                  <ChevronLeft />
-                ) : (
-                  <ChevronRight />
-                )}
+                <ChevronLeft />
               </IconButton>
             )
           }
@@ -209,96 +253,30 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, handleToggleDrawerOpe
         </ContainerGroup>
       </Drawer>
 
-      <ContainerMenuFlutuante>
-        <Button
-          ref={buttonMenuFlutuanteRef}
-          aria-controls={openMenuFlutuante ? "menu-list-grow" : undefined}
-          aria-haspopup="true"
-          onClick={handleToggle}
-          style={{
-            marginTop: 200
-          }}
-        >
-          <Fab aria-label="add">
-            <Add />
-          </Fab>
-        </Button>
-        <Popper
-          open={openMenuFlutuante}
-          anchorEl={buttonMenuFlutuanteRef.current}
-          role={undefined}
-          transition
-          disablePortal
-        >
-          {({ TransitionProps, placement }) => (
-            <Grow
-              {...TransitionProps}
-              style={{
-                transformOrigin:
-                  placement === "top" ? "center top" : "center top"
-              }}
-            >
-              <Paper>
-                <ClickAwayListener onClickAway={handleCloseMenuFlutuante}>
-                  <MenuList
-                    autoFocusItem={openMenuFlutuante}
-                    id="menu-list-grow"
-                    onKeyDown={handleListKeyDown}
-                  >
-                    <MenuItem onClick={(event) => {
-                      handleCloseMenuFlutuante(event); 
-                      handleToogleDialog();
-                    }}>
-                        Novo grupo
-                    </MenuItem>
-                  </MenuList>
-                </ClickAwayListener>
-              </Paper>
-            </Grow>
-          )}
-        </Popper>
-
-        <Dialog open={openDialogCreateRoom} onClose={handleToogleDialog} aria-labelledby="form-dialog-title">
-          <DialogTitle id="form-dialog-title">Criar grupo</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Crie um grupo, para conversar com os seus amigos...
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Nome do grupo"
-              type="text"
-              fullWidth
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleToogleDialog} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleToogleDialog} color="primary">
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </ContainerMenuFlutuante>
-
-      {
-        /*
-        <Menu
-          id="fade-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={openAvatarMemu}
-          onClose={handleToogleAvatarMenu}
-          TransitionComponent={Fade}
-        >
-          <MenuItem onClick={handleToogleAvatarMenu}>Profile</MenuItem>
-          <MenuItem onClick={handleToogleAvatarMenu}>My account</MenuItem>
-          <MenuItem onClick={handleToogleAvatarMenu}>Logout</MenuItem>
-        </Menu>*/
-      }
+      <Dialog open={openDialogCreateRoom} onClose={handleToogleDialog} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create group</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Create a group to chat with your friends ...
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Group's name"
+            type="text"
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleToogleDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleToogleDialog} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   )
 }

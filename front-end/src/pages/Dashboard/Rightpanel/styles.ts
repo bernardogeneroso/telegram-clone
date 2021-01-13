@@ -110,6 +110,7 @@ export const Footer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 55px;
 
   .file:nth-child(1) {
     transform: rotate(-135deg);
@@ -124,4 +125,11 @@ export const Footer = styled.div`
   input::placeholder {
     padding-left: 6px;
   }
+`
+
+export const ContainerPicker = styled.div`
+  position: absolute;
+  right: 20px;
+  bottom: 75px;
+  z-index: 99;
 `

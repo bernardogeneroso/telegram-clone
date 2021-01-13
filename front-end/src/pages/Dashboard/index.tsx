@@ -1,11 +1,10 @@
-import React, {useState, useCallback} from "react";
+import React, {useState, useCallback, useRef} from "react";
 
 import {Sockets} from "../../hooks/Sockets";
 
 import Leftpanel from './Leftpanel'
 import Rightpanel from './Rightpanel'
 import Righpanelnotselected from './Righpanelnotselected'
-
 
 import {Rooms} from './Leftpanel'
 
@@ -15,6 +14,8 @@ const Dashboard = () => {
   const [openDrawer, setOpenDrawer] = useState<boolean>(true as boolean);
   const [drawerWidth, setDrawerWidth] = useState(400 as number)
   const [roomSelected, setRoomSelected] = useState<Rooms>({} as Rooms)
+
+  const refInputSearch = useRef<HTMLInputElement>(null)
 
   const handleToggleDrawerOpen = useCallback(() => {
     setOpenDrawer(value => {
@@ -41,6 +42,7 @@ const Dashboard = () => {
           roomSelected={roomSelected}
           handleToggleDrawerOpen={handleToggleDrawerOpen}
           handleRoomSelected={handleRoomSelected}
+          refInputSearch={refInputSearch}
         />
         
         {
@@ -48,7 +50,8 @@ const Dashboard = () => {
             <Rightpanel 
               openDrawer={openDrawer}
               roomSelected={roomSelected}
-              handleToggleDrawerOpen={handleToggleDrawerOpen} 
+              handleToggleDrawerOpen={handleToggleDrawerOpen}
+              refInputSearch={refInputSearch}
             />
           ) : (
             <Righpanelnotselected />

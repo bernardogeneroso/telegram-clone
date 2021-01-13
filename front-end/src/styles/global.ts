@@ -28,4 +28,8 @@ export default createGlobalStyle`
   button {
     cursor: pointer;
   }
+
+  .MuiIconButton-root {
+    padding: 6px !important;
+  }
 `;

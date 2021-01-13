@@ -20,7 +20,7 @@ export const Container = styled.div<ContainerInterface>`
 `
 
 export const Header = styled.div`
-  height: 55px;
+  height: 54px;
   padding: 10px 10px 10px 0;
 
   flex: 1;
@@ -58,6 +58,26 @@ export const HeaderSearchContainer = styled.div`
     right: 6px;
     top: 8px;
     opacity: 0.8;
+  }
+`
+
+export const HeaderDrawerMenu = styled.div`
+  height: 120px;
+
+  padding: 22px;
+  background: rgba(59,157,218,1);
+
+  div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  p {
+    margin-top: 16px;
+
+    color: #fff;
+    font-weight: 500;
   }
 `
 
@@ -135,12 +155,6 @@ export const ContentGroup = styled.div<ContentGroupInterface>`
       }
     }
   }
-`
-
-export const ContainerMenuFlutuante = styled.div`
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
 `
 
 export const AvatarProfile = styled.div`
