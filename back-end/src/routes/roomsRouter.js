@@ -13,11 +13,11 @@ const upload = multer({
   storage: StorageMulter.StorageRooms
 })
 
-roomsRouter.get('/:id', authenticateToken, (req, res) => {
-  const {id:user_id} = req.params 
+roomsRouter.get('/', authenticateToken, (req, res) => {
+  const user_id = req.user.id
 
   try {
-    con.query(`SELECT r.id, r.name, r.image, u.fullname, rlm.user_message, rlm.user_date
+    con.query(`SELECT DISTINCT(r.id), r.name, r.image, u.fullname, rlm.user_message, rlm.user_date
     FROM rooms AS r
     LEFT JOIN rooms_users AS ru 
     ON r.id = ru.id_rooms
@@ -40,8 +40,6 @@ roomsRouter.post('/create-room', (req, res) => {
   const {name, users} = req.body
   const {id} = req.user
 
-  users.unshift(id)
-
   try {
     con.query(`INSERT INTO rooms (name) VALUES ('${name}')`, function (err, result) {
       if (err) {
@@ -52,6 +50,8 @@ roomsRouter.post('/create-room', (req, res) => {
       }
 
       const room_id = result.insertId
+
+      con.query(`INSERT INTO rooms_lastmessage (id_rooms, id_users) VALUES ('${room_id}', '${id}')`)
 
       users.forEach(id_user => {
         con.query(`INSERT INTO rooms_users (id_rooms, id_users) VALUES ('${room_id}', '${id_user}')`, function (err, result) {

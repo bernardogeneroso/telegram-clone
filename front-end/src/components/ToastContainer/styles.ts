@@ -10,5 +10,5 @@ export const Container = styled.div<ContainerProps>`
   top: 0;
   padding: 30px;
   overflow: hidden;
-  z-index: ${props => props.zIndexMessageShow ? 99 : -1};
+  z-index: ${props => props.zIndexMessageShow ? 9999999 : -1};
 `;

@@ -1,4 +1,4 @@
-import styled, { css } from 'styled-components'
+import styled, { css, keyframes } from 'styled-components'
 
 interface ContainerMessageInterface {
   receive?: boolean;
@@ -37,11 +37,33 @@ export const Header = styled.div`
 
 export const ContainerMessages = styled.div`
   height: calc(100% - 110px);
-
-  background-color: rgba(59, 157, 218, 0.8);
-
   padding: 16px 18px 16px 18px;
+  overflow-y: auto;
+  
+  background-color: rgba(59, 157, 218, 0.8);
 `
+
+const appearFromLeft = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
+
+const appearFromRight = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
 
 export const ContainerMessage = styled.div<ContainerMessageInterface>`
   position: relative;
@@ -51,6 +73,8 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
   flex-direction: column;
   flex-wrap: wrap;
   align-items: flex-end;
+
+  animation: ${props => props.receive ? appearFromLeft : appearFromRight} 0.8s;
 
   & + div {
     margin-top: 16px;
@@ -74,6 +98,7 @@ export const ContainerMessage = styled.div<ContainerMessageInterface>`
     font-size: 12px;
     display: flex;
     align-items: flex-end;
+    justify-content: space-between;
 
     p {
       margin-right: 10px;
@@ -106,7 +131,7 @@ export const MessageContent = styled.div`
   color: #000;
 `
 
-export const Footer = styled.div`
+export const Footer = styled.form`
   display: flex;
   flex-direction: row;
   align-items: center;

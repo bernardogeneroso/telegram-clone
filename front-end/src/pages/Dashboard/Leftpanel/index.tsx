@@ -1,41 +1,35 @@
-import React, {useState, useEffect, useMemo, useRef, useCallback, RefObject} from 'react'
+import React, {useState, useMemo, useRef, useCallback, RefObject} from 'react'
 import { makeStyles } from "@material-ui/core/styles";
 import {IconButton, Button, Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText, TextField, Drawer, Divider, Avatar, SwipeableDrawer, List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, Switch} from '@material-ui/core'
-import {ChevronLeft, PeopleAltOutlined, NightsStayOutlined, ExitToApp, Menu} from '@material-ui/icons'
+import {ChevronLeft, GroupAddOutlined,  ContactsOutlined, NightsStayOutlined, ExitToApp, Menu} from '@material-ui/icons'
 import { AiOutlineSearch, AiOutlineClose } from "react-icons/ai";
 import {format, parseISO} from 'date-fns'
 
 import api from '../../../services/api';
 import { useAuth } from '../../../hooks/Auth';
+import { useSockets, Rooms } from '../../../hooks/Sockets';
+import { useToast } from '../../../hooks/Toast';
 
 import { Container, Header, HeaderSearchContainer, HeaderDrawerMenu, ContainerGroup, ContentGroup } from "./styles";
-
-export interface Rooms {
-  id: string;
-  name: string;
-  image: string;
-  fullname: string;
-  user_message: string;
-  user_date: string;
-}
 
 interface LeftPanelParams {
   openDrawer: boolean;
   drawerWidth: number;
-  roomSelected: Rooms;
   refInputSearch: RefObject<HTMLInputElement>;
   handleToggleDrawerOpen: () => void;
-  handleRoomSelected: (rooms: Rooms) => void;
 }
 
-const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handleToggleDrawerOpen, handleRoomSelected}: LeftPanelParams) => {
-  const { data, signOut } = useAuth();
+const Leftpanel = ({openDrawer, drawerWidth, refInputSearch, handleToggleDrawerOpen}: LeftPanelParams) => {
+  const { data, signOut } = useAuth()
+  const {rooms, roomSelected, handleRoomSelected, leaveChannel, createRoom} = useSockets()
+  const {addToast} = useToast()
 
   const [searchFind, setSearchFind] = useState<boolean>(false)
   const [openDialogCreateRoom, setOpenDialogCreateRoom] = useState<boolean>(false)
   const [openDrawerMenuAvatar, setOpenDrawerMenuAvatar] = useState<boolean>(false)
   const [nightMode, setNightMode] = useState<boolean>(false)
-  const [rooms, setRooms] = useState<Rooms[]>([])
+
+  const [groupName, setGroupName] = useState<string>("")
 
   const buttonMenuFlutuanteAvatarRef = useRef<HTMLButtonElement>(null);
 
@@ -88,12 +82,6 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
 
   const classes = useStyles();
 
-  useEffect(() => {
-    api.get(`/rooms/${data.user.id}`).then(result => {
-      setRooms(result.data)
-    })
-  }, [data.user.id])
-
   const handleToogleDialog = useCallback(() => {
     setOpenDialogCreateRoom(value => !value)
   }, [])
@@ -107,6 +95,38 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
       setNightMode(value => !value)
     },
     [],
+  )
+
+  const handleCreateRoom = useCallback(
+    () => {
+      if (groupName !== "") {
+        const room_data = {
+          name: groupName,
+          users: [data.user.id]
+        }
+
+        api.post('/rooms/create-room', room_data).then(response => {
+          let room_info: Rooms = response.data.room
+
+          room_info = {
+            ...room_info,
+            image: "https://web.telegram.org/img/logo_share.png",
+            fullname: null,
+            user_message: null,
+            user_date: null
+          }
+
+          createRoom(room_info)
+
+          addToast({
+            type: "success",
+            title: "Group successfully created",
+            description: `New group called ${room_info.name}`
+          })
+        })
+      }
+    },
+    [groupName, data.user.id, addToast, createRoom],
   )
 
   const eventHandlersSearch = useMemo(() => ({
@@ -129,8 +149,10 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
           <Button 
             ref={buttonMenuFlutuanteAvatarRef} 
             aria-controls={openDrawer ? 'menu-list-grow' : undefined} 
-            aria-haspopup="true" style={{
+            aria-haspopup="true" 
+            style={{
               minWidth: 'auto',
+              opacity: 0.6
             }}
             onClick={handleToogleMenuDrawerMenu}
           >
@@ -171,8 +193,17 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
                   }}
                   onClick={handleToogleDialog}
                 >
-                  <ListItemIcon><PeopleAltOutlined /></ListItemIcon>
+                  <ListItemIcon><GroupAddOutlined /></ListItemIcon>
                   <ListItemText primary="New Group" />
+                </ListItem>
+                <ListItem 
+                  button 
+                  style={{
+                    padding: '10px 22px'
+                  }}
+                >
+                  <ListItemIcon><ContactsOutlined /></ListItemIcon>
+                  <ListItemText primary="Contacts" />
                 </ListItem>
                 <ListItem 
                     button 
@@ -231,7 +262,10 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
               <ContentGroup
                 selected={roomSelected.id === room.id ? true : false} 
                 key={room.id} 
-                onClick={() => handleRoomSelected(room)}
+                onClick={() => {
+                  leaveChannel(roomSelected.id)
+                  handleRoomSelected(room)
+                }}
               >
                 <div>
                   <img src={room.image} alt={room.name} />
@@ -240,7 +274,7 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
                 <div>
                   <header>
                     <span>{room.name}</span>
-                    {room.user_message && <time>{format(parseISO(room.user_date), 'd.MM.Y')}</time>}
+                    {room.user_date && <time>{format(parseISO(room.user_date), 'd.MM.Y')}</time>}
                   </header>
              
 
@@ -266,13 +300,17 @@ const Leftpanel = ({openDrawer, drawerWidth, roomSelected, refInputSearch, handl
             label="Group's name"
             type="text"
             fullWidth
+            onChange={(event) => setGroupName(event.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleToogleDialog} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleToogleDialog} color="primary">
+          <Button onClick={() => {
+                handleToogleDialog()
+                handleCreateRoom()
+          }} color="primary">
             Create
           </Button>
         </DialogActions>
