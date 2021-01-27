@@ -111,6 +111,18 @@ const RightPanel = ({openDrawer, refInputSearch, handleToggleDrawerOpen}: RightP
     [searchInput, data.user.fullname, data.user.id, roomSelected.id],
   )
 
+  const handleTimeOfMessages = useCallback((time: string) => {
+    const dateNow = new Date()
+    const formatTime = parseISO(time)
+
+    const differenceInHoursNow = differenceInHours(dateNow, formatTime)
+    if (differenceInHoursNow <= 18){
+      return format(formatTime, 'k:mm')
+    }
+
+    return format(formatTime, 'd/MMM/Y - k:mm')
+  }, [])
+
   const handleFormatDateOfRoom = useMemo(() => {
     if (!roomSelected.user_date) return roomSelected.user_date
 
@@ -148,7 +160,7 @@ const RightPanel = ({openDrawer, refInputSearch, handleToggleDrawerOpen}: RightP
       }
     } else {
       if (differenceInYearsNow === 1) {
-        return `last seen a 1 year ago`
+        return `last seen a 1 year ago in day ${format(roomTime, 'd.MM.Y')}`
       } else {
         return `last seen ${format(roomTime, 'd.MM.Y')}`
       }
@@ -235,7 +247,7 @@ const RightPanel = ({openDrawer, refInputSearch, handleToggleDrawerOpen}: RightP
                 </p>
                 
                 <div>
-                  {format(parseISO(message.message_timestamp), 'k:mm')} <BiCheckDouble size={22} />
+                  {handleTimeOfMessages(message.message_timestamp)} <BiCheckDouble size={22} />
                 </div>
               </footer>
             </ContainerMessage>
