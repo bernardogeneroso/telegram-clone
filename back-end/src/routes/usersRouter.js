@@ -51,6 +51,13 @@ usersRouter.post('/sessions', (req, res) => {
 
   try {
     con.query(`SELECT * FROM users WHERE email='${email}';`, async function (err, result) {
+      if (err) {
+        return res.status(400).send({
+          error: err,
+          error_message: "Error on validate session"
+        })
+      }
+
       if (result !== undefined || result[0]) {
         const user = result[0]
 

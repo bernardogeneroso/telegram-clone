@@ -49,14 +49,7 @@ messagesRouter.post('/newMessage', (req, res) => {
         }
       })
 
-      /*const roomData = {
-        fullname: user_fullname,
-        user_message: message,
-        user_date: dateNow
-      }*/
-
       pusher.trigger(channelName, 'client-messageRoom', messageSendAllRoomUsers)
-      //pusher.trigger(channelName, 'client-roomUpdateData', roomData)
 
       return res.status(200).send()
     });
@@ -111,7 +104,9 @@ messagesRouter.get('/:id', (req, res) => {
     FROM rooms_messages AS rm
     INNER JOIN users AS u
     ON rm.id_users = u.id
-    WHERE rm.id_rooms = '${room_id}'`, function (err, result) {
+    WHERE rm.id_rooms = '${room_id}'
+    GROUP BY rm.id
+    ORDER BY rm.id`, function (err, result) {
       if (err) {
         res.status(400).send({
           error: err,

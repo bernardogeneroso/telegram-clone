@@ -26,6 +26,7 @@ interface AuthContextData {
   messages: Messages[];
   rooms: Rooms[];
   roomSelected: Rooms;
+  scrollStartMessage: boolean;
   handleRoomSelected(rooms: Rooms): void;
   createRoom(rooms: Rooms): void;
   leaveChannel(chanel_name: string): void;
@@ -34,7 +35,7 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 const Sockets: React.FC = ({ children }) => {
-  const {data: {token}} = useAuth()
+  const {data} = useAuth()
 
   const [socket] = useState(() => {
     Pusher.logToConsole = true;
@@ -43,7 +44,7 @@ const Sockets: React.FC = ({ children }) => {
       cluster: 'eu',
       auth: {
         headers: {
-          'authorization': `Bearer ${token}`
+          'authorization': `Bearer ${data.token}`
         }
       }
     });
@@ -51,6 +52,7 @@ const Sockets: React.FC = ({ children }) => {
   const [chanelName, setChanelName] = useState<Channel>()
   const [rooms, setRooms] = useState<Rooms[]>([])
   const [messages, setMessages] = useState<Messages[]>([])
+  const [scrollStartMessage, setScrollStartMessage] = useState<boolean>(false)
   const [roomSelected, setRoomSelected] = useState<Rooms>(() => {
     const roomSelectedlocalStorage = localStorage.getItem("Telegram:roomSelected");
 
@@ -62,20 +64,25 @@ const Sockets: React.FC = ({ children }) => {
   })
 
   useEffect(() => {
-    api.get(`/rooms`).then(result => {
-      setRooms(result.data)
-    })
-  }, [])
+    if (data.user){
+      api.get(`/rooms`).then(result => {
+        setRooms(result.data)
+      })
+    }
+  }, [data.user])
 
   useEffect(() => {
-    api.get(`/messages/${roomSelected.id}`).then(result => {
-      setMessages(result.data)
-    })
+    if (data.user){
+      api.get(`/messages/${roomSelected.id}`).then(result => {
+        setMessages(result.data)
+        setScrollStartMessage(true)
+      })
 
-    const channel = socket.subscribe("room"+roomSelected.id);
+      const channel = socket.subscribe("room"+roomSelected.id);
 
-    setChanelName(channel)
-  }, [socket, roomSelected.id])
+      setChanelName(channel)
+    }
+  }, [socket, roomSelected.id, data.user])
 
   useEffect(() => {
     if (chanelName){
@@ -92,6 +99,7 @@ const Sockets: React.FC = ({ children }) => {
     socket.unsubscribe("room"+chanel_name);
 
     setChanelName(undefined)
+    setScrollStartMessage(false)
   }, [socket]);
 
   const handleRoomSelected = useCallback((room: Rooms) => {
@@ -112,7 +120,8 @@ const Sockets: React.FC = ({ children }) => {
         handleRoomSelected,
         messages,
         roomSelected,
-        rooms
+        rooms,
+        scrollStartMessage
       }}
     >
       {children}

@@ -19,21 +19,23 @@ interface RightPanelParams {
 
 const RightPanel = ({openDrawer, refInputSearch, handleToggleDrawerOpen}: RightPanelParams) => {
   const {data} = useAuth()
-  const {messages, roomSelected} = useSockets()
+  const {messages, roomSelected, scrollStartMessage} = useSockets()
 
   const containerMessageRef = useRef<HTMLDivElement>(null);
 
   const [searchInput, setSearchInput] = useState("")
-  const [openMenuFlutuanteInfo, setOpenMenuFlutuanteInfo] = useState<boolean>(false);
-  const buttonMenuFlutuanteInfo = useRef<HTMLButtonElement>(null);
+  const [openMenuFlutuanteInfo, setOpenMenuFlutuanteInfo] = useState<boolean>(false)
+  const buttonMenuFlutuanteInfo = useRef<HTMLButtonElement>(null)
   const [emojiPicker, setEmojiPicker] = useState<boolean>(false)
 
   useEffect(() => {
-    const scrollValue = containerMessageRef.current?.scrollHeight;
-    if (scrollValue){
-      containerMessageRef.current?.scrollTo(0, scrollValue);
+    if (scrollStartMessage){
+      const scrollValue = containerMessageRef.current?.scrollHeight;
+      if (scrollValue){
+        containerMessageRef.current?.scrollTo(0, scrollValue);
+      }
     }
-  }, [roomSelected.id])
+  }, [scrollStartMessage])
 
   useEffect(() => {
     const scrollValue = containerMessageRef.current?.scrollHeight;
@@ -46,6 +48,8 @@ const RightPanel = ({openDrawer, refInputSearch, handleToggleDrawerOpen}: RightP
       }
     }
   }, [messages]);
+
+
  
   const handleSearchInput = useCallback(
     (event) => {
